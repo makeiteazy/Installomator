@@ -1552,6 +1552,14 @@ valuesfromarguments)
     ;;
 
 # label descriptions start here
+pathfinder)
+    name="Path Finder"
+    type="dmg"
+    downloadURL="https://get.cocoatech.com/PathFinder.dmg"
+    versionKey="CFBundleVersion"
+    appNewVersion=$(curl -f "${downloadURL}" | grep -i changes | head -1 | sed -E 's/.*version ([0-9]+).*/\1/')
+    expectedTeamID="5GM4WX237V"
+    ;;
 1password7)
     name="1Password 7"
     type="pkg"
