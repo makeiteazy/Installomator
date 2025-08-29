@@ -1552,6 +1552,21 @@ valuesfromarguments)
     ;;
 
 # label descriptions start here
+advolux)
+    name="Haufe Advolux Kanzleisoftware Installationsprogramm_m1"
+    type="dmg"
+    downloadURL="https://download.advolux.de/macosx-m1.php"
+    versionKey="CFBundleShortVersionString"
+    appNewVersion=$(curl -fsIL "${downloadURL}" | grep -i ^location | cut -d "_" -f3)
+    expectedTeamID="TD936WV4J6"
+    ;;
+bnotksaklite)
+    name="BNotK SAK Lite"
+    type="dmg"
+    downloadURL="https://sso.bnotk.de/saklite/bnotk-saklite-latest-setup-macos.dmg"
+    versionKey="CFBundleVersion"
+    expectedTeamID="SUVE3REYTH"
+    ;;
 pathfinder)
     name="Path Finder"
     type="dmg"
@@ -1559,6 +1574,14 @@ pathfinder)
     versionKey="CFBundleVersion"
     appNewVersion=$(curl -f https://store.cocoatech.io/updates | grep -i changes | head -1 | sed -E 's/.*version ([0-9]+).*/\1/')
     expectedTeamID="5GM4WX237V"
+    ;;
+whisper)
+    name="WhisperTranscribe"
+    type="dmg"
+    downloadURL="https://api.whispertranscribe.com/download/mac"
+    versionKey="CFBundleVersion"
+    appNewVersion=$(curl -fsIL "${downloadURL}" | grep -i ^Content-Disposition | cut -d "-" -f3)
+    expectedTeamID="X77Z2VJ228"
     ;;
 1password7)
     name="1Password 7"
