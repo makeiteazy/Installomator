@@ -263,7 +263,6 @@ sudo ./assemble.sh -l fragments/custom labelname NOTIFY=silent DEBUG=0
 ## Was ich NICHT tue
 
 - Dateien außerhalb von `fragments/custom/` bearbeiten oder erstellen
-- Labels anlegen, die bereits in `fragments/labels/` existieren
 - `Installomator.sh` im Root direkt bearbeiten (wird generiert)
 - PRs oder Branches erstellen (das ist Aufgabe des Benutzers)
 - Dateien im Ordner `fragments/disabled/` oder `fragments/broken/` anlegen

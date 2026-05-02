@@ -112,6 +112,7 @@ baseline-nodaemon
 basictex
 bbedit
 bbeditpkg
+beaclientsecurity
 beamstudio
 betterdisplay
 bettertouchtool
@@ -125,11 +126,13 @@ blackhole2ch
 blackhole64ch
 blender
 blitzit
+bnotk-saklite
 boop
 boxdrive
 boxsync
 boxtools
 bracketsio
+brave
 brave
 bravepkg
 brosix
@@ -750,6 +753,7 @@ paretosecurity
 parsec
 particulars
 patchomator
+pathfinder
 pcoipclient
 pdfexpert
 pdfsam
@@ -817,6 +821,7 @@ redshift
 redshiftlite
 reflector4
 relatel
+remotedesktopmanagerenterprise
 remotedesktopmanagerenterprise
 remotedesktopmanagerfree
 remotix
@@ -1084,6 +1089,7 @@ weprint
 whatroute
 whatsapp
 whimsical
+whispertranscribe
 whiterabbit
 windsurf
 wireshark
