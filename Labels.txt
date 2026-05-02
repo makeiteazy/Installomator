@@ -237,6 +237,10 @@ cormorant
 craftmanagerforsketch
 crashplan
 crashplansmb
+creativeforcehue
+creativeforcekelvin
+creativeforceluma
+creativeforcetriad
 cricutdesignspace
 cryptomator
 crystalfetch
@@ -305,6 +309,7 @@ ecosiabrowser
 editshare-connect
 egnytecore
 egnytewebedit
+elan
 elasticvue
 element
 elevate24
@@ -386,6 +391,7 @@ gitkraken
 globusconnectpersonal
 glpiagent
 glyphs3
+gns3
 golang
 googleadseditor
 googlechrome
@@ -504,6 +510,7 @@ jre8
 jumpcloudpasswordmanager
 jumpdesktop
 jupyterlab
+kaleidoscope
 kap
 karabinerelements
 kdrive
@@ -519,6 +526,7 @@ keyshot12
 keyshot2024
 keystoreexplorer
 kimplusclientmodul
+kirocli
 klokki
 knockknock
 kommodo
@@ -699,6 +707,7 @@ nova
 nps-santa
 nudge
 nudgesuite
+numi
 nvivo
 nvivo13
 nvivo14
@@ -1093,6 +1102,7 @@ whispertranscribe
 whiterabbit
 windsurf
 wireshark
+wisprflow
 wordservice
 workbrew
 workplacechat
