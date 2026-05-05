@@ -356,6 +356,8 @@ finaldraft11
 finaldraft12
 finaldraft13
 findanyfile
+firecutfordavinciresolve
+firecutforpremierepro
 firefox
 firefox_da
 firefox_intl
@@ -745,6 +747,7 @@ onlyofficedesktop
 onscreencontrol
 onyx
 openeid
+openlens
 openrefine
 openvpnconnect
 openvpnconnectv3
@@ -840,6 +843,7 @@ reflector4
 relatel
 remotedesktopmanager
 remotedesktopmanagerenterprise
+remotedesktopmanagerenterprise
 remotedesktopmanagerfree
 remotix
 remotixagent
@@ -922,6 +926,7 @@ snagit2022
 snagit2023
 snagit2024
 snagit2025
+snagit2026
 snagit2026
 snapgene
 snapgeneviewer
@@ -1072,7 +1077,6 @@ veracrypt-macfuse
 vernierspectralanalysis
 vfx
 viennaassistant
-vimac
 vimcal
 virtualbox
 virtualboxbeta

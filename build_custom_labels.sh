@@ -1,0 +1,1 @@
+./assemble.sh --labels fragments/custom --script

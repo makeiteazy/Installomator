@@ -349,7 +349,7 @@ if [[ $(/usr/bin/arch) == "arm64" ]]; then
     fi
 fi
 VERSION="10.9beta"
-VERSIONDATE="2026-05-04"
+VERSIONDATE="2026-05-05"
 
 # MARK: Functions
 
@@ -1875,6 +1875,8 @@ adobeacrobatprodc)
     pkgName="Acrobat/Acrobat DC Installer.pkg"
     packageID="com.adobe.acrobat.DC.viewer.app.pkg.MUI"
     downloadURL="https://trials.adobe.com/AdobeProducts/APRO/Acrobat_HelpX/osx10/Acrobat_DC_Web_WWMUI.dmg"
+    releaseNotesURL="https://www.adobe.com/devnet-docs/acrobatetk/tools/ReleaseNotesDC/index.html"
+    appNewVersion=$(curl -sfL "$releaseNotesURL" | grep -m6 "continuous/dccontinuous.*#" | awk '!/Optional update/ { if ($0 ~ /\(Windows Only\)/) next; else if (match($0, /[0-9]+\.[0-9]+\.[0-9]+ *\(Mac\)/)) {v=substr($0,RSTART,RLENGTH); sub(/ *\(Mac\)/,"",v); print v} else if (match($0, /[0-9]+\.[0-9]+\.[0-9]+/)) print substr($0,RSTART,RLENGTH) }' | head -n1)
     expectedTeamID="JQ525L2MZD"
     blockingProcesses=( "Acrobat Pro DC" )
     Company="Adobe"
@@ -2497,13 +2499,11 @@ archimate)
     name="Archi"
     type="dmg"
     if [[ $(arch) == "arm64" ]]; then
-      downloadURL="https://www.archimatetool.com"
-      downloadURL+=$(curl -s https://www.archimatetool.com/download/ | grep dmg | sed -n 's/.*href="\([^"]*\)".*/\1/p' | awk 'NR==2')
+      downloadURL=$(curl -s https://www.archimatetool.com/download/ | grep -oE 'href="[^"]+\.dmg"' | cut -d'"' -f2 | grep -E '[sS]ilicon')
     elif [[ $(arch) == "i386" ]]; then
-      downloadURL="https://www.archimatetool.com"
-      downloadURL+=$(curl -s https://www.archimatetool.com/download/ | grep dmg | sed -n 's/.*href="\([^"]*\)".*/\1/p' | awk 'NR==1')
+      downloadURL=$(curl -s https://www.archimatetool.com/download/ | grep -oE 'href="[^"]+\.dmg"' | cut -d'"' -f2 | grep -Ev '[sS]ilicon')
     fi
-    appNewVersion=$(echo "${downloadURL}" | sed 's/.*\/downloads\/index.php?\/downloads\/archi\/\([^\/]*\)\/Archi-.*/\1/')
+    appNewVersion=$(echo "${downloadURL}" | sed -E 's/.*\/([0-9]+\.[0-9]+\.[0-9]+)\/.*/\1/')
     expectedTeamID="375WT5T296"
     ;;
 archiwareb2go)
@@ -2753,8 +2753,13 @@ backgrounds)
 balenaetcher)
     name="balenaEtcher"
     type="dmg"
-    downloadURL=$(downloadURLFromGit balena-io etcher )
-    appNewVersion=$(versionFromGit balena-io etcher )
+    if [[ $(arch) == "arm64" ]]; then
+        archiveName="balenaEtcher-[0-9.]*-arm64.dmg"
+    elif [[ $(arch) == "i386" ]]; then
+        archiveName="balenaEtcher-[0-9.]*-x64.dmg"
+    fi
+    downloadURL="$(downloadURLFromGit balena-io etcher)"
+    appNewVersion="$(versionFromGit balena-io etcher)"
     expectedTeamID="66H43P8FRG"
     ;;
 balsamiqwireframes)
@@ -4030,10 +4035,11 @@ crystalfetch)
 cursorai)
     name="Cursor"
     type="dmg"
-    appNewVersion=$(curl -sL "https://www.cursor.com/changelog" | xmllint --html -xpath "//article[1]" - 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n 1)
-    downloadURL=$(curl -fsL "https://www.cursor.com/api/download?platform=darwin-universal&releaseTrack=stable" | grep -o '"downloadUrl":"[^"]*"' | sed 's/"downloadUrl":"\([^"]*\)"/\1/')
+    updateFeed=$(curl -fsL  "https://www.cursor.com/api/download?platform=darwin-universal&releaseTrack=latest")
+    appNewVersion=$(getJSONValue "${updateFeed}" "version")
+    downloadURL=$(getJSONValue "${updateFeed}" "downloadUrl")
     expectedTeamID="VDXQ22DGB9"
-    blockingProcesses=( "Cursor" )
+    versionKey="CFBundleVersion"
     ;;
 cyberduck)
     name="Cyberduck"
@@ -4150,8 +4156,7 @@ deepl)
 deezer)
     name="Deezer"
     type="dmg"
-    # There is no arm/universal binary. Need rosetta2 to run it on apple silicon
-    downloadURL="https://www.deezer.com/desktop/download?platform=darwin&architecture=x64"
+    downloadURL="https://www.deezer.com/desktop/download?platform=darwin&architecture=x64&platformVersion=9999"
     appNewVersion=$(curl -fsLI "$downloadURL" | grep -o "DeezerDesktop_[0-9]*\.[0-9]*\.[0-9]*" | cut -d'_' -f2)
     expectedTeamID="7QLUP2K45C"
     ;;
@@ -4693,8 +4698,8 @@ elasticvue)
 element)
     name="Element"
     type="dmg"
-    downloadURL="https://packages.riot.im/desktop/install/macos/Element.dmg"
-    appNewVersion=$(versionFromGit vector-im element-desktop)
+    downloadURL="https://packages.element.io/desktop/install/macos/Element.dmg"
+    appNewVersion=$(versionFromGit element-hq element-web)
     expectedTeamID="7J4U792NQT"
     ;;
 elevate24)
@@ -5052,6 +5057,27 @@ findanyfile)
     downloadURL=$(curl -fs "https://findanyfile.app/appcast2.php" | xpath '(//rss/channel/item/enclosure/@url)[1]' 2>/dev/null | cut -d '"' -f2)
     appNewVersion=$(curl -fs "https://findanyfile.app/appcast2.php" | xpath '(//rss/channel/item/enclosure/@sparkle:shortVersionString)[1]' 2>/dev/null | cut -d '"' -f2)
     expectedTeamID="25856V4B4X"
+    ;;
+firecutfordavinciresolve)
+    name="FireCut for DaVinci Resolve"
+    type="dmg"
+    if [[ "$(arch)" == "arm64" ]]; then
+        downloadURL="$(curl -fsIL https://firecut.ai/downloads/davinci/apple_silicon/ | grep -i ^location | awk '{print $2}' | tr -d '\r' | grep "https://" | tail -1)"
+    else
+        downloadURL="$(curl -fsIL https://firecut.ai/downloads/davinci/apple_intel/ | grep -i ^location | awk '{print $2}' | tr -d '\r' | grep "https://" | tail -1)"
+    fi
+    appNewVersion=$(echo $downloadURL | awk -F "." '{print$7}' | sed 's/v//' | sed 's/_/./g')
+    expectedTeamID="7ASRSVAEMS"
+    blockingProcesses=( "Resolve" )
+    ;;
+firecutforpremierepro)
+    name="FireCut for Premiere Pro"
+    type="pkg"
+    downloadURL="$(curl -fsL https://firecut.ai/downloads/premiere-pro/ | grep "FireCut_PP_Dist.*pkg" | grep -o "https://.*pkg")"
+    appNewVersion=$(echo $downloadURL | grep -o "[0-9].*[0-9]")
+    appCustomVersion(){ xmllint --xpath '//ExtensionList' '/Library/Application Support/Adobe/CEP/extensions/com.firecut.base/CSXS/manifest.xml' | grep -o "[0-9].*[0-9]" }
+    expectedTeamID="7ASRSVAEMS"
+    blockingProcesses=( "Adobe Premiere Pro 2024" "Adobe Premiere Pro 2025" "Adobe Premiere Pro 2026" "Adobe Premiere Pro 2027" )
     ;;
 firefox)
     name="Firefox"
@@ -5528,7 +5554,7 @@ googleadseditor)
     name="Google Ads Editor"
     type="dmg"
     downloadURL="https://dl.google.com/adwords_editor/google_ads_editor.dmg"
-    appNewVersion="$(curl -s "https://support.google.com/google-ads/editor/topic/13728" | grep -E -o "Google Ads Editor version.{1,4}" | head -1 | tail -c 4)"
+    appNewVersion="$(curl -s "https://support.google.com/google-ads/editor/topic/13728" | grep -Eo 'Google Ads Editor version [0-9]+(\.[0-9]+)*' | head -1 | grep -Eo '[0-9]+(\.[0-9]+)*')"
     appCustomVersion(){cat /Applications/Google\ Ads\ Editor.app/Contents/Versions/*/Google\ Ads\ Editor.app/Contents/locale/content/welcome1/welcome1-en-US.htm | grep -o -E " about version.{0,4}" | tail -c 4}
     expectedTeamID="EQHXZ8M8AV"
     ;;
@@ -7543,8 +7569,11 @@ microsoftazurestorageexplorer)
 microsoftcompanyportal)
     name="Company Portal"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=853070"
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409IMCP01.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Location"]/following-sibling::string[1]/text()' - | sed 's/-Upgrade/-Installer/' 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
+    versionKey="CFBundleVersion"
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
         printlog "Running msupdate --list"
         "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
@@ -7556,9 +7585,9 @@ microsoftdefender|\
 microsoftdefenderatp)
     name="Microsoft Defender"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=2097502"
-    appNewVersion=$(curl -fs https://raw.githubusercontent.com/MicrosoftDocs/defender-docs/public/defender-endpoint/mac-whatsnew.md | grep -m 1 -o "Build: [0-9\.]*" | awk '{print $2}')
-    # No version number in download url
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409WDAV00.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Location"]/following-sibling::string[1]/text()' - | sed 's/-upgrade//' 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
         printlog "Running msupdate --list"
@@ -7579,14 +7608,16 @@ microsoftedgeenterprisestable)
 microsoftexcel)
     name="Microsoft Excel"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=525135"
-    #appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.excel.standalone.365"]/cfbundleshortversionstring' 2>/dev/null | sed -E 's/<cfbundleshortversionstring>([0-9.]*)<.*/\1/')
-    appNewVersion=$(curl -fsIL "$downloadURL" | grep -i location: | grep -o "/Microsoft_.*pkg" | cut -d "_" -f 3 | cut -d "." -f 1-2)
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409XCEL2019.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="FullUpdaterLocation"]/following-sibling::string[1]/text()' - | sed 's/_Updater/_Installer/' 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
+    versionKey="CFBundleVersion"
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
         printlog "Running msupdate --list"
         "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
     fi
+    blockingProcesses=( "Microsoft Excel" )
     updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
     updateToolArguments=( --install --apps XCEL2019 )
     ;;
@@ -7713,16 +7744,10 @@ microsoftonedrive)
     # https://support.microsoft.com/en-us/office/onedrive-release-notes-845dcf18-f921-435e-bf28-4e24b95e5fc0#OSVersion=Mac
     name="OneDrive"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=823060"
-    #appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.onedrive.standalone"]/cfbundleshortversionstring' 2>/dev/null | sed -E 's/<cfbundleshortversionstring>([0-9.]*)<.*/\1/')
-    appNewVersion=$(curl -fsIL "$downloadURL" | grep -i location: | cut -d "/" -f 6 | cut -d "." -f 1-3)
+    MAUSource="https://oneclient.sfx.ms/Mac/Prod/b9de6823d5a66c7cc845b2dbf90f4935c002aeaf.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="UniversalPkgBinaryURL"]/following-sibling::string[1]/text()' - 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="CFBundleShortVersionString"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
-    if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
-        printlog "Running msupdate --list"
-        "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
-    fi
-    updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
-    updateToolArguments=( --install --apps ONDR18 )
     ;;
 microsoftonedrivereset)
     name="Microsoft OneDrive Reset"
@@ -7754,14 +7779,16 @@ microsoftonedrivesuprod)
 microsoftonenote)
     name="Microsoft OneNote"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=820886"
-    #appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.onenote.standalone.365"]/cfbundleshortversionstring' 2>/dev/null | sed -E 's/<cfbundleshortversionstring>([0-9.]*)<.*/\1/')
-    appNewVersion=$(curl -fsIL "$downloadURL" | grep -i location: | grep -o "/Microsoft_.*pkg" | cut -d "_" -f 3 | cut -d "." -f 1-2)
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409ONMC2019.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="FullUpdaterLocation"]/following-sibling::string[1]/text()' - 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
+    versionKey="CFBundleVersion"
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
         printlog "Running msupdate --list"
         "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
     fi
+    blockingProcesses=( "Microsoft OneNote" )
     updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
     updateToolArguments=( --install --apps ONMC2019 )
     ;;
@@ -7791,14 +7818,16 @@ microsoftoutlook-monthly)
 microsoftoutlook)
     name="Microsoft Outlook"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=525137"
-    #appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.outlook.standalone.365"]/cfbundleshortversionstring' 2>/dev/null | sed -E 's/<cfbundleshortversionstring>([0-9.]*)<.*/\1/')
-    appNewVersion=$(curl -fsIL "$downloadURL" | grep -i location: | grep -o "/Microsoft_.*pkg" | cut -d "_" -f 3 | cut -d "." -f 1-2)
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409OPIM2019.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="FullUpdaterLocation"]/following-sibling::string[1]/text()' - | sed 's/_Updater/_Installer/' 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
+    versionKey="CFBundleVersion"
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
         printlog "Running msupdate --list"
         "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
     fi
+    blockingProcesses=( "Microsoft Outlook" )
     updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
     updateToolArguments=( --install --apps OPIM2019 )
     ;;
@@ -7819,14 +7848,16 @@ microsoftoutlookreset)
 microsoftpowerpoint)
     name="Microsoft PowerPoint"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=525136"
-    #appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.powerpoint.standalone.365"]/cfbundleshortversionstring' 2>/dev/null | sed -E 's/<cfbundleshortversionstring>([0-9.]*)<.*/\1/')
-    appNewVersion=$(curl -fsIL "$downloadURL" | grep -i location: | grep -o "/Microsoft_.*pkg" | cut -d "_" -f 3 | cut -d "." -f 1-2)
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409PPT32019.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="FullUpdaterLocation"]/following-sibling::string[1]/text()' - | sed 's/_Updater/_Installer/' 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
+    versionKey="CFBundleVersion"
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
         printlog "Running msupdate --list"
         "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
     fi
+    blockingProcesses=( "Microsoft PowerPoint" )
     updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
     updateToolArguments=( --install --apps PPT32019 )
     ;;
@@ -7836,20 +7867,6 @@ microsoftpowerpointreset)
     packageID="com.microsoft.reset.PowerPoint"
     downloadURL="https://office-reset.com"$(curl -fs https://office-reset.com/macadmins/ | grep -o -i "href.*\".*\"*PowerPoint_Reset.*.pkg" | cut -d '"' -f2)
     expectedTeamID="QGS93ZLCU7"
-    ;;
-microsoftremotedesktop)
-    name="Microsoft Remote Desktop"
-    type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=868963"
-    #appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.remotedesktop.standalone"]/cfbundleshortversionstring' 2>/dev/null | sed -E 's/<cfbundleshortversionstring>([0-9.]*)<.*/\1/')
-    appNewVersion=$(curl -fsIL "$downloadURL" | grep -i location: | grep -o "/Microsoft_Remote_Desktop.*pkg" | cut -d "_" -f 4)
-    expectedTeamID="UBF8T346G9"
-    if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
-        printlog "Running msupdate --list"
-        "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
-    fi
-    updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
-    updateToolArguments=( --install --apps MSRD10 )
     ;;
 microsoftremotehelp)
     name="Microsoft Remote Help"
@@ -7925,23 +7942,19 @@ microsoftteams)
     updateToolArguments=( --install --apps TEAMS10 ) # --wait 600 #TEAM01
     ;;
 microsoftteamsnew)
-    name="Microsoft Teams (work or school)"
+    name="Microsoft Teams"
     type="pkg"
-    #packageID="com.microsoft.teams2"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=2249065"
-    #appNewVersion=$(curl -fsIL "${downloadURL}" | grep -i "^location" | tail -1 | cut -d "/" -f5)
-    # No version in download path, so grab it from homepage
-    appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.teams2.standalone"]/version' 2>/dev/null | sed -E 's/<version>([0-9.]*) .*/\1/')
-    #versionKey="CFBundleGetInfoString"
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409TEAMS21.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Location"]/following-sibling::string[1]/text()' - 2>/dev/null )
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
     blockingProcesses=( MSTeams "Microsoft Teams" "Microsoft Teams WebView" "Microsoft Teams Launcher" "Microsoft Teams (work preview)")
-    # msupdate requires a PPPC profile pushed out from Jamf to work, https://github.com/pbowden-msft/MobileConfigs/tree/master/Jamf-MSUpdate
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
         printlog "Running msupdate --list"
         "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
     fi
     updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
-    updateToolArguments=( --install --apps TEAMS21 ) # --wait 600 # TEAM01
+    updateToolArguments=( --install --apps TEAMS21 )
     ;;
 microsoftteamsreset)
     name="Microsoft Teams Reset"
@@ -7960,26 +7973,34 @@ visualstudiocode)
     appName="Visual Studio Code.app"
     blockingProcesses=( Code )
     ;;
-microsoftwindowsapp)
+microsoftwindowsapp|\
+microsoftremotedesktop)
     name="Windows App"
     type="pkg"
-    packageID="com.microsoft.rdc.macos"
-    blockingProcesses=( "Windows App" "Microsoft Remote Desktop" )
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=868963"
-    appNewVersion="$(curl -is "${downloadURL}" | grep "Location" | grep -o '[0-9][0-9]\.[0-9]*\.[0-9]*')"
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409MSRD10.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Location"]/following-sibling::string[1]/text()' - | sed 's/_updater/_installer/' 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Title"]/following-sibling::string[1]/text()' - | grep -oE '[\.0-9]*' 2>/dev/null)
     expectedTeamID="UBF8T346G9"
+    if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" && $DEBUG -eq 0 ]]; then
+        printlog "Running msupdate --list"
+        "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
+    fi
+    updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
+    updateToolArguments=( --install --apps MSRD10 )
     ;;
 microsoftword)
     name="Microsoft Word"
     type="pkg"
-    downloadURL="https://go.microsoft.com/fwlink/?linkid=525134"
-    #appNewVersion=$(curl -fs https://macadmins.software/latest.xml | xpath '//latest/package[id="com.microsoft.word.standalone.365"]/cfbundleshortversionstring' 2>/dev/null | sed -E 's/<cfbundleshortversionstring>([0-9.]*)<.*/\1/')
-    appNewVersion=$(curl -fsIL "$downloadURL" | grep -i location: | grep -o "/Microsoft_.*pkg" | cut -d "_" -f 3 | cut -d "." -f 1-2)
+    MAUSource="https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/0409MSWD2019.xml"
+    downloadURL=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="FullUpdaterLocation"]/following-sibling::string[1]/text()' - | sed 's/_Updater/_Installer/' 2>/dev/null)
+    appNewVersion=$(curl -fsL $MAUSource | xmllint --xpath '//array/dict[1]/key[text()="Update Version"]/following-sibling::string[1]/text()' - 2>/dev/null)
     expectedTeamID="UBF8T346G9"
+    versionKey="CFBundleVersion"
     if [[ -x "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" && $INSTALL != "force" ]]; then
         printlog "Running msupdate --list"
         "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate" --list
     fi
+    blockingProcesses=( "Microsoft Word" )
     updateTool="/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/msupdate"
     updateToolArguments=( --install --apps MSWD2019 )
     ;;
@@ -8718,6 +8739,19 @@ openeid)
     blockingProcesses=( "EstEIDTokenApp" "EstEIDTokenNotify" "web-eid" )
     appCustomVersion(){ if [[ -d /Applications/Utilities/EstEIDTokenApp.app ]] && [[ -d /Applications/Utilities/web-eid.app ]];then /usr/sbin/pkgutil --pkg-info ee.ria.open-eid | grep "version" | awk '{print$2}';fi }
     ;;
+openlens)
+    name="OpenLens"
+    if [[ $(arch) == "arm64" ]]; then
+        type="dmg"
+        archiveName="OpenLens-[0-9.-]*-arm64.dmg"
+    else
+        type="zip"
+        archiveName="OpenLens-[0-9.-]*-mac.zip"
+    fi
+    downloadURL="$(downloadURLFromGit MuhammedKalkan OpenLens)"
+    appNewVersion="$(versionFromGit MuhammedKalkan OpenLens)"
+    expectedTeamID="HGC72W36QJ"
+    ;;
 openrefine)
     name="OpenRefine"
     type="dmg"
@@ -9076,9 +9110,10 @@ podmandesktopairgap)
 polleverywhere)
     name="Poll Everywhere"
     type="dmg"
-    downloadURL="https://www.polleverywhere.com/app.dmg"
-    appNewVersion=""
+    appNewVersion=$(curl -fsL https://www.polleverywhere.com/app/releases/mac | grep h3 --max-count 1 | awk '{ gsub(/<\/?h3>/, ""); print }')
+    downloadURL="https://polleverywhere-app.s3.amazonaws.com/mac-stable/$appNewVersion/pollev.dmg"
     expectedTeamID="W48F3X5M8W"
+    versionKey="CFBundleVersion"
     ;;
 polylens)
     name="Poly Lens"
@@ -9789,9 +9824,9 @@ scenebuilder)
     name="SceneBuilder"
     type="dmg"
     if [[ $(arch) == "arm64" ]]; then
-        downloadURL=$(curl -sfL "https://gluonhq.com/products/scene-builder/" | xmllint --html --format - 2>/dev/null | grep -o "https://.*SceneBuilder.*aarch64.dmg")
+        downloadURL=$(curl -sfL "https://gluonhq.com/products/scene-builder/" | xmllint --html --format - 2>/dev/null | grep -v 'RC' | grep -o "https://.*SceneBuilder.*aarch64.dmg")
     elif [[ $(arch) == "i386" ]]; then
-        downloadURL=$(curl -sfL "https://gluonhq.com/products/scene-builder/" | xmllint --html --format - 2>/dev/null | grep -o "https://.*SceneBuilder.*amd64.dmg")
+        downloadURL=$(curl -sfL "https://gluonhq.com/products/scene-builder/" | xmllint --html --format - 2>/dev/null | grep -v 'RC' | grep -o "https://.*SceneBuilder.*amd64.dmg")
     fi
     appNewVersion=$( echo "${downloadURL}" | sed -E 's/.*\/[a-zA-Z]*-([0-9.]*)-.*/\1/g' )
     expectedTeamID="S7ZR395D8U"
@@ -11121,13 +11156,12 @@ toonboomstoryboardpro2025)
 
 topazgigapixel|\
 topazgigapixelai)
-    # credit: Tully Jagoe
     name="Topaz Gigapixel AI"
     type="pkg"
-    appNewVersion=$(curl -fs https://www.topazlabs.com/downloads | grep  -o 'gigaVersion = "v.*"' | grep -o ' "v.*"' | sed -E 's/[v|"| ]//g')
     versionKey="CFBundleShortVersionString"
     downloadURL="https://topazlabs.com/d/gigapixel/latest/mac/full"
-    archiveName="TopazGigapixelAI-${appNewVersion}.pkg"
+    archiveName=$(curl -fsIL $downloadURL | grep -i ^location | awk -F "/" '{print $NF}')
+    appNewVersion=$(grep -oi "[0-9].*[0-9]" <<< $archiveName)
     expectedTeamID="3G3JE37ZHF"
     ;;
 topazphoto|\
@@ -11499,13 +11533,6 @@ viennaassistant)
     appNewVersion="$(getJSONValue $(curl -fs 'https://api.vsl.co.at/data/.well-known/dataservice-configuration') vaLatestVersionReadable)"
     appCustomVersion(){/usr/bin/defaults read "/Applications/Vienna Assistant/Vienna Assistant.app/Contents/Info.plist" CFBundleVersion}
     expectedTeamID="XR8G94NNCL"
-    ;;
-vimac)
-    name="Vimac"
-    type="zip"
-    downloadURL=$(curl -fs "https://vimacapp.com/latest-release-metadata" | tr ',' '\n' | awk -F\" '/download_url/ {print $4}')
-    appNewVersion=$(curl -fs "https://vimacapp.com/latest-release-metadata" | tr ',' '\n' | awk -F\" '/short_version/ {print $4}')
-    expectedTeamID="LQ2VH8VB84"
     ;;
 vimcal)
     name="Vimcal"
