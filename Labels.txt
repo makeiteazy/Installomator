@@ -116,6 +116,7 @@ beaclientsecurity
 beamstudio
 betterdisplay
 bettertouchtool
+betterzip
 beyondcomparepro
 bibdesk
 bitrix24
@@ -150,6 +151,7 @@ calcservice
 calibre
 calibriteprofiler
 camostudio
+camtasia
 camtasia2019
 camtasia2020
 camtasia2021
@@ -157,6 +159,7 @@ camtasia2022
 camtasia2023
 camtasia2024
 camtasia2025
+camtasia2026
 camunda
 canva
 carboncopycloner
@@ -304,6 +307,7 @@ easyfind
 eclipsetemurin11
 eclipsetemurin17
 eclipsetemurin21
+eclipsetemurin25
 eclipsetemurin8
 ecosiabrowser
 editshare-connect
@@ -343,6 +347,9 @@ fellow
 fierycommandworkstation
 figma
 filemakerpro
+filemakerpro20
+filemakerpro21
+filemakerpro22
 filmlab
 finalcutprocontent
 finaldraft11
@@ -526,6 +533,7 @@ keyshot12
 keyshot2024
 keystoreexplorer
 kimplusclientmodul
+kiro
 kirocli
 klokki
 knockknock
@@ -563,6 +571,7 @@ logitune
 logseq
 loom
 loopcloud
+losslesscut
 loupedeck
 lowprofile
 lsagent
@@ -693,7 +702,6 @@ netnewswire
 netspot
 networksharemounter
 nextcloud
-nextcloudclassic
 nextcloudtalk
 nodejs
 nodejslts
@@ -830,7 +838,7 @@ redshift
 redshiftlite
 reflector4
 relatel
-remotedesktopmanagerenterprise
+remotedesktopmanager
 remotedesktopmanagerenterprise
 remotedesktopmanagerfree
 remotix
@@ -879,6 +887,7 @@ secretive
 selfcontrol
 sequelace
 sequelpro
+sessiondesktop
 sfsymbols
 shield
 shotcut
@@ -905,6 +914,7 @@ sloth
 smartgit
 smartsheet
 smartsvn
+snagit
 snagit2019
 snagit2020
 snagit2021
@@ -1117,6 +1127,7 @@ xeroxworkcentre7800
 xink
 xmenu
 xmind
+xmplify
 xquartz
 yed
 youleanloudnessmeter2
@@ -1130,6 +1141,7 @@ zen
 zenbrowser
 zeplin
 zerotier
+zettlr
 zipwhip
 zohoworkdrive
 zohoworkdrivegenie
